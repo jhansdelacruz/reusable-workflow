@@ -1,0 +1,46 @@
+name: Pulumi Deployment
+
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        required: true
+        type: string
+      pulumi-org:
+        required: true
+        type: string
+      pulumi-stack:
+        required: true
+        type: string
+      pulumi-command:
+        required: true
+        type: string
+      work-dir:
+        required: true
+        type: string
+    secrets:
+      aws-access-key-id:
+        required: true
+      aws-secret-access-key:
+        required: true
+      pulumi-access-token:
+        required: true
+jobs:
+  Deployment:
+    runs-on: self-hosted
+    steps:
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Despliega con Pulumi
+        uses: pulumi/actions@v5
+        with:
+          command: ${{inputs.pulumi-command}}
+          stack-name: ${{inputs.pulumi-org}}/${{inputs.pulumi-stack}}
+          work-dir: ${{inputs.work-dir}}
+        env:
+          PULUMI_ACCESS_TOKEN: ${{secrets.pulumi-access-token}}
+          AWS_ACCESS_KEY_ID: ${{secrets.aws-access-key-id}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.aws-secret-access-key}}
+          AWS_REGION: ${{inputs.aws-region}}

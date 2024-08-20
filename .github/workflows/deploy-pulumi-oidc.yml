@@ -1,0 +1,53 @@
+name: Pulumi Deployment
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: true
+        type: string
+      pulumi-org:
+        required: true
+        type: string
+      pulumi-stack:
+        required: true
+        type: string
+      pulumi-requested-token:
+        required: true
+        type: string
+      pulumi-auth-scope:
+        required: true
+        type: string
+      pulumi-command:
+        required: true
+        type: string
+      work-dir:
+        required: true
+        type: string
+
+jobs:
+  Deployment:
+    name: Pulumi-up
+    runs-on: self-hosted
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Configurar Node.js ${{inputs.node-version}}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{inputs.node-version}}
+      - name: Autenticacion en Pulumi Cloud
+        uses: pulumi/auth-actions@v1
+        with:
+          organization: ${{inputs.pulumi-org}}
+          requested-token-type: ${{inputs.pulumi-requested-token}}
+          scope: ${{inputs.pulumi-auth-scope}}
+          export-environment-variables: true
+
+      - name: Create the resources
+        uses: pulumi/actions@v5
+        with:
+          command: ${{inputs.pulumi-command}}
+          stack-name: ${{inputs.pulumi-org}}/${{inputs.pulumi-stack}}
+          work-dir: ${{inputs.work-dir}}
